@@ -236,14 +236,14 @@ export default function POSTabletView({
       {/* Main Content Container */}
       <div className="flex-1 pt-12 overflow-hidden flex flex-col">
 
-        {/* POS Tabs Bar - Similar to Desktop */}
+        {/* POS Tabs Bar - Compact Design */}
         <div className="bg-[#2B3544] border-b border-gray-600 flex items-center justify-between flex-shrink-0">
           {/* Right Side: Selection Display */}
-          <div className="flex items-center gap-3 text-xs px-3 py-2 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-2 text-[10px] px-2 py-1 overflow-x-auto scrollbar-hide">
             {/* Customer/Supplier */}
             <span className="text-gray-300 whitespace-nowrap">
               {isPurchaseMode ? 'المورد' : 'العميل'}:{' '}
-              <span className="text-white font-medium text-xs">
+              <span className="text-white font-medium">
                 {isPurchaseMode
                   ? selectedSupplier
                     ? selectedSupplier.name
@@ -264,7 +264,7 @@ export default function POSTabletView({
                   : 'فرع / مخزن'
                 : 'الفرع'}
               :{' '}
-              <span className="text-white font-medium text-xs">
+              <span className="text-white font-medium">
                 {isPurchaseMode
                   ? selectedWarehouse
                     ? selectedWarehouse.name
@@ -278,7 +278,7 @@ export default function POSTabletView({
             {/* Record */}
             <span className="text-gray-300 whitespace-nowrap">
               السجل:{' '}
-              <span className="text-white font-medium text-xs">
+              <span className="text-white font-medium">
                 {selections.record ? selections.record.name : 'غير محدد'}
               </span>
             </span>
@@ -293,7 +293,7 @@ export default function POSTabletView({
                 onClick={() => {
                   clearSelections()
                 }}
-                className="text-xs text-gray-400 hover:text-red-400 transition-colors px-2 py-1 rounded whitespace-nowrap"
+                className="text-[10px] text-gray-400 hover:text-red-400 transition-colors px-1.5 py-0.5 rounded whitespace-nowrap"
               >
                 مسح الكل
               </button>
@@ -301,7 +301,7 @@ export default function POSTabletView({
           </div>
 
           {/* Vertical Divider */}
-          <div className="h-8 w-px bg-gray-600"></div>
+          <div className="h-6 w-px bg-gray-600"></div>
 
           {/* Left Side: POS Tabs */}
           <div className="flex items-center overflow-x-auto scrollbar-hide flex-1">
@@ -316,7 +316,7 @@ export default function POSTabletView({
               >
                 <button
                   onClick={() => switchTab(tab.id)}
-                  className="px-3 py-2 text-xs font-medium flex items-center gap-2 transition-colors whitespace-nowrap"
+                  className="px-2 py-1 text-[10px] font-medium flex items-center gap-1 transition-colors whitespace-nowrap"
                 >
                   <span>{tab.title}</span>
                 </button>
@@ -327,10 +327,10 @@ export default function POSTabletView({
                       e.stopPropagation()
                       closeTab(tab.id)
                     }}
-                    className="ml-1 p-1 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                    className="ml-0.5 p-0.5 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                     title="إغلاق"
                   >
-                    <XMarkIcon className="w-3 h-3" />
+                    <XMarkIcon className="w-2.5 h-2.5" />
                   </button>
                 )}
               </div>
@@ -339,139 +339,137 @@ export default function POSTabletView({
             {/* Add New Tab Button */}
             <button
               onClick={() => setShowAddTabModal(true)}
-              className="px-2 py-2 text-green-400 hover:text-green-300 hover:bg-green-500/10 transition-colors flex items-center gap-1 border-l border-gray-600"
+              className="px-1.5 py-1 text-green-400 hover:text-green-300 hover:bg-green-500/10 transition-colors flex items-center gap-0.5 border-l border-gray-600"
               title="إضافة نافذة بيع جديدة"
             >
-              <PlusIcon className="w-3 h-3" />
+              <PlusIcon className="w-2.5 h-2.5" />
             </button>
           </div>
         </div>
 
-        {/* Action Buttons Bar - Similar to Mobile POS Design */}
-        <div className="bg-[#374151] border-b border-gray-600 px-4 py-2 w-full mt-12 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              {/* Selection Buttons - First three buttons with red dot indicator */}
-              <button
-                onClick={() => setIsRecordsModalOpen(true)}
-                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all relative"
-              >
-                <DocumentTextIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">السجل</span>
-                {!selections.record && (
-                  <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
-                )}
-              </button>
+        {/* Action Buttons Bar - Horizontal Design */}
+        <div className="bg-[#374151] border-b border-gray-600 px-4 py-2 w-full flex-shrink-0 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-2 min-w-max">
+            {/* First 3 Selection Buttons with Red Dot Indicator */}
+            <button
+              onClick={() => setIsRecordsModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-300 hover:text-white hover:bg-gray-600/30 rounded-md transition-all relative"
+            >
+              <DocumentTextIcon className="h-4 w-4" />
+              <span>السجل</span>
+              {!selections.record && (
+                <div className="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-1 right-1"></div>
+              )}
+            </button>
 
-              <button
-                onClick={() => isPurchaseMode ? setIsSupplierModalOpen(true) : setIsCustomerModalOpen(true)}
-                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all relative"
-              >
-                <UserIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">{isPurchaseMode ? 'المورد' : 'العميل'}</span>
-                {isPurchaseMode ? (
-                  !selectedSupplier && <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
-                ) : (
-                  !selections.customer && <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
-                )}
-              </button>
+            <button
+              onClick={() => isPurchaseMode ? setIsSupplierModalOpen(true) : setIsCustomerModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-300 hover:text-white hover:bg-gray-600/30 rounded-md transition-all relative"
+            >
+              <UserIcon className="h-4 w-4" />
+              <span>{isPurchaseMode ? 'المورد' : 'العميل'}</span>
+              {isPurchaseMode ? (
+                !selectedSupplier && <div className="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-1 right-1"></div>
+              ) : (
+                !selections.customer && <div className="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-1 right-1"></div>
+              )}
+            </button>
 
-              <button
-                onClick={() => isPurchaseMode ? setIsWarehouseModalOpen(true) : setIsBranchModalOpen(true)}
-                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all relative"
-              >
-                <BuildingOfficeIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">{isPurchaseMode ? 'المخزن' : 'الفرع'}</span>
-                {isPurchaseMode ? (
-                  !selectedWarehouse && <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
-                ) : (
-                  !selections.branch && <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
-                )}
-              </button>
+            <button
+              onClick={() => isPurchaseMode ? setIsWarehouseModalOpen(true) : setIsBranchModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-300 hover:text-white hover:bg-gray-600/30 rounded-md transition-all relative"
+            >
+              <BuildingOfficeIcon className="h-4 w-4" />
+              <span>{isPurchaseMode ? 'المخزن' : 'الفرع'}</span>
+              {isPurchaseMode ? (
+                !selectedWarehouse && <div className="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-1 right-1"></div>
+              ) : (
+                !selections.branch && <div className="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-1 right-1"></div>
+              )}
+            </button>
 
-              {/* Vertical Divider */}
-              <div className="h-12 w-px bg-gray-600 mx-2"></div>
+            {/* Vertical Divider */}
+            <div className="h-6 w-px bg-gray-600"></div>
 
-              {/* History Button */}
-              <button
-                onClick={() => setIsHistoryModalOpen(true)}
-                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all"
-              >
-                <ClockIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">التاريخ</span>
-              </button>
+            {/* Other Action Buttons */}
+            <button
+              onClick={() => setIsHistoryModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-300 hover:text-white hover:bg-gray-600/30 rounded-md transition-all"
+            >
+              <ClockIcon className="h-4 w-4" />
+              <span>التاريخ</span>
+            </button>
 
-              {/* Quick Add Product */}
-              <button
-                onClick={() => setShowQuickAddProductModal(true)}
-                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all"
-              >
-                <PlusIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">إضافة</span>
-              </button>
-            </div>
+            <button
+              onClick={() => setShowQuickAddProductModal(true)}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-300 hover:text-white hover:bg-gray-600/30 rounded-md transition-all"
+            >
+              <PlusIcon className="h-4 w-4" />
+              <span>إضافة منتج</span>
+            </button>
 
-            {/* Right Side - Mode Buttons */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => {
-                  setIsTransferMode(false)
-                  setIsReturnMode(false)
-                  setShowPurchaseModeConfirm(false)
-                  setTransferFromLocation(null)
-                  setTransferToLocation(null)
-                }}
-                className={`flex flex-col items-center p-2 cursor-pointer min-w-[70px] transition-all rounded ${
-                  !isPurchaseMode && !isTransferMode && !isReturnMode
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-[#4B5563]'
-                }`}
-              >
-                <HomeIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">بيع</span>
-              </button>
+            {/* Vertical Divider */}
+            <div className="h-6 w-px bg-gray-600"></div>
 
-              <button
-                onClick={() => setShowPurchaseModeConfirm(true)}
-                className={`flex flex-col items-center p-2 cursor-pointer min-w-[70px] transition-all rounded ${
-                  isPurchaseMode && !isTransferMode && !isReturnMode
-                    ? 'bg-purple-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-[#4B5563]'
-                }`}
-              >
-                <BuildingOfficeIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">شراء</span>
-              </button>
+            {/* Mode Buttons */}
+            <button
+              onClick={() => {
+                setIsTransferMode(false)
+                setIsReturnMode(false)
+                setShowPurchaseModeConfirm(false)
+                setTransferFromLocation(null)
+                setTransferToLocation(null)
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs rounded-md transition-all ${
+                !isPurchaseMode && !isTransferMode && !isReturnMode
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-600/30'
+              }`}
+            >
+              <HomeIcon className="h-4 w-4" />
+              <span>بيع</span>
+            </button>
 
-              <button
-                onClick={() => {
-                  setIsTransferMode(true)
-                  setIsReturnMode(false)
-                  setShowPurchaseModeConfirm(false)
-                  setIsTransferLocationModalOpen(true)
-                }}
-                className={`flex flex-col items-center p-2 cursor-pointer min-w-[70px] transition-all rounded ${
-                  isTransferMode && !isReturnMode
-                    ? 'bg-orange-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-[#4B5563]'
-                }`}
-              >
-                <ArrowsRightLeftIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">نقل</span>
-              </button>
+            <button
+              onClick={() => setShowPurchaseModeConfirm(true)}
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs rounded-md transition-all ${
+                isPurchaseMode && !isTransferMode && !isReturnMode
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-600/30'
+              }`}
+            >
+              <BuildingOfficeIcon className="h-4 w-4" />
+              <span>شراء</span>
+            </button>
 
-              <button
-                onClick={() => setIsReturnMode(!isReturnMode)}
-                className={`flex flex-col items-center p-2 cursor-pointer min-w-[70px] transition-all rounded ${
-                  isReturnMode
-                    ? 'bg-red-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-[#4B5563]'
-                }`}
-              >
-                <ArrowUturnLeftIcon className="h-5 w-5 mb-1" />
-                <span className="text-sm">مرتجع</span>
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                setIsTransferMode(true)
+                setIsReturnMode(false)
+                setShowPurchaseModeConfirm(false)
+                setIsTransferLocationModalOpen(true)
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs rounded-md transition-all ${
+                isTransferMode && !isReturnMode
+                  ? 'bg-orange-600 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-600/30'
+              }`}
+            >
+              <ArrowsRightLeftIcon className="h-4 w-4" />
+              <span>نقل</span>
+            </button>
+
+            <button
+              onClick={() => setIsReturnMode(!isReturnMode)}
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs rounded-md transition-all ${
+                isReturnMode
+                  ? 'bg-red-600 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-600/30'
+              }`}
+            >
+              <ArrowUturnLeftIcon className="h-4 w-4" />
+              <span>مرتجع</span>
+            </button>
           </div>
         </div>
 

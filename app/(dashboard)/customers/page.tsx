@@ -542,9 +542,9 @@ export default function CustomersPage() {
       {/* Main Content Container */}
       <div className="h-full pt-12 overflow-hidden flex flex-col">
         
-        {/* Top Action Buttons Toolbar - Full Width */}
+        {/* Top Action Buttons Toolbar - Full Width with Horizontal Scroll */}
         <div className="bg-[#374151] border-b border-gray-600 px-4 py-2 w-full">
-          <div className="flex items-center justify-start gap-1">
+          <div className="flex items-center justify-start gap-1 overflow-x-auto scrollbar-hide">
             <button className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px]">
               <ArrowPathIcon className="h-5 w-5 mb-1" />
               <span className="text-sm">تحديث</span>
