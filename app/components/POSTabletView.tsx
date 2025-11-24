@@ -5,6 +5,7 @@ import { ProductGridImage } from './ui/OptimizedImage'
 import Sidebar from './layout/Sidebar'
 import TopHeader from './layout/TopHeader'
 import PaymentSplit from './PaymentSplit'
+import ResizableTable from './tables/ResizableTable'
 import {
   MagnifyingGlassIcon,
   Squares2X2Icon,
@@ -164,6 +165,66 @@ export default function POSTabletView({
   // Cart open: 2 products per row, Cart closed: 4 products per row
   const gridCols = isCartOpen ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
 
+  // Table columns for products
+  const tableColumns = useMemo(() => [
+    {
+      id: 'index',
+      header: '#',
+      accessor: '#',
+      width: 60,
+      render: (value: any, item: any, index: number) => (
+        <span className="text-gray-400 font-medium">{index + 1}</span>
+      ),
+    },
+    {
+      id: 'name',
+      header: 'اسم المنتج',
+      accessor: 'name',
+      width: 200,
+      render: (value: string) => <span className="text-white font-medium">{value}</span>,
+    },
+    {
+      id: 'category',
+      header: 'المجموعة',
+      accessor: 'category',
+      width: 120,
+      render: (value: any) => (
+        <span className="text-gray-300">
+          {value?.name || 'غير محدد'}
+        </span>
+      ),
+    },
+    {
+      id: 'price',
+      header: 'سعر البيع',
+      accessor: 'price',
+      width: 120,
+      render: (value: number) => (
+        <span className="text-white">{formatPrice(value || 0, 'system')}</span>
+      ),
+    },
+    {
+      id: 'barcode',
+      header: 'الباركود',
+      accessor: 'barcode',
+      width: 150,
+      render: (value: string) => (
+        <span className="text-gray-300 font-mono text-sm">{value || '-'}</span>
+      ),
+    },
+    {
+      id: 'is_active',
+      header: 'نشيط',
+      accessor: 'is_active',
+      width: 80,
+      render: (value: boolean) => (
+        <div className="flex justify-center">
+          <div className={`w-3 h-3 rounded-full ${value ? 'bg-green-500' : 'bg-red-500'}`}></div>
+        </div>
+      ),
+    },
+  ], [formatPrice])
+
   return (
     <div className="h-screen bg-[#2B3544] overflow-hidden flex flex-col">
       {/* Top Header */}
@@ -286,117 +347,131 @@ export default function POSTabletView({
           </div>
         </div>
 
-        {/* Top Action Buttons Toolbar - Horizontal scrollable */}
-        <div className="bg-[#374151] border-b border-gray-600 px-2 py-2 flex-shrink-0">
-          <div
-            ref={toolbarRef}
-            className="flex items-center gap-1 overflow-x-auto scrollbar-hide"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch'
-            }}
-          >
-            {/* Mode Buttons */}
-            <button
-              onClick={() => {
-                setIsTransferMode(false)
-                setIsReturnMode(false)
-                setShowPurchaseModeConfirm(false)
-                setTransferFromLocation(null)
-                setTransferToLocation(null)
-              }}
-              className={`flex items-center gap-2 px-3 py-2 text-xs whitespace-nowrap rounded transition-colors ${
-                !isPurchaseMode && !isTransferMode && !isReturnMode
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-[#2B3544] text-gray-300 hover:text-white hover:bg-[#434E61]'
-              }`}
-            >
-              <HomeIcon className="h-4 w-4" />
-              <span>بيع</span>
-            </button>
+        {/* Action Buttons Bar - Similar to Mobile POS Design */}
+        <div className="bg-[#374151] border-b border-gray-600 px-4 py-2 w-full mt-12 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              {/* Selection Buttons - First three buttons with red dot indicator */}
+              <button
+                onClick={() => setIsRecordsModalOpen(true)}
+                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all relative"
+              >
+                <DocumentTextIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">السجل</span>
+                {!selections.record && (
+                  <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
+                )}
+              </button>
 
-            <button
-              onClick={() => setShowPurchaseModeConfirm(true)}
-              className={`flex items-center gap-2 px-3 py-2 text-xs whitespace-nowrap rounded transition-colors ${
-                isPurchaseMode && !isTransferMode && !isReturnMode
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-[#2B3544] text-gray-300 hover:text-white hover:bg-[#434E61]'
-              }`}
-            >
-              <BuildingOfficeIcon className="h-4 w-4" />
-              <span>شراء</span>
-            </button>
+              <button
+                onClick={() => isPurchaseMode ? setIsSupplierModalOpen(true) : setIsCustomerModalOpen(true)}
+                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all relative"
+              >
+                <UserIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">{isPurchaseMode ? 'المورد' : 'العميل'}</span>
+                {isPurchaseMode ? (
+                  !selectedSupplier && <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
+                ) : (
+                  !selections.customer && <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
+                )}
+              </button>
 
-            <button
-              onClick={() => {
-                setIsTransferMode(true)
-                setIsReturnMode(false)
-                setShowPurchaseModeConfirm(false)
-                setIsTransferLocationModalOpen(true)
-              }}
-              className={`flex items-center gap-2 px-3 py-2 text-xs whitespace-nowrap rounded transition-colors ${
-                isTransferMode && !isReturnMode
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-[#2B3544] text-gray-300 hover:text-white hover:bg-[#434E61]'
-              }`}
-            >
-              <ArrowsRightLeftIcon className="h-4 w-4" />
-              <span>نقل</span>
-            </button>
+              <button
+                onClick={() => isPurchaseMode ? setIsWarehouseModalOpen(true) : setIsBranchModalOpen(true)}
+                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all relative"
+              >
+                <BuildingOfficeIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">{isPurchaseMode ? 'المخزن' : 'الفرع'}</span>
+                {isPurchaseMode ? (
+                  !selectedWarehouse && <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
+                ) : (
+                  !selections.branch && <div className="w-1 h-1 bg-red-400 rounded-full mt-1"></div>
+                )}
+              </button>
 
-            <button
-              onClick={() => setIsReturnMode(!isReturnMode)}
-              className={`flex items-center gap-2 px-3 py-2 text-xs whitespace-nowrap rounded transition-colors ${
-                isReturnMode
-                  ? 'bg-red-600 text-white'
-                  : 'bg-[#2B3544] text-gray-300 hover:text-white hover:bg-[#434E61]'
-              }`}
-            >
-              <ArrowUturnLeftIcon className="h-4 w-4" />
-              <span>مرتجع</span>
-            </button>
+              {/* Vertical Divider */}
+              <div className="h-12 w-px bg-gray-600 mx-2"></div>
 
-            {/* Selection Buttons */}
-            <button
-              onClick={() => isPurchaseMode ? setIsSupplierModalOpen(true) : setIsCustomerModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white cursor-pointer whitespace-nowrap bg-[#2B3544] hover:bg-[#434E61] rounded transition-colors"
-            >
-              <UserIcon className="h-4 w-4" />
-              <span className="text-xs">{isPurchaseMode ? 'اختيار مورد' : 'اختيار عميل'}</span>
-            </button>
+              {/* History Button */}
+              <button
+                onClick={() => setIsHistoryModalOpen(true)}
+                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all"
+              >
+                <ClockIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">التاريخ</span>
+              </button>
 
-            <button
-              onClick={() => isPurchaseMode ? setIsWarehouseModalOpen(true) : setIsBranchModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white cursor-pointer whitespace-nowrap bg-[#2B3544] hover:bg-[#434E61] rounded transition-colors"
-            >
-              <BuildingOfficeIcon className="h-4 w-4" />
-              <span className="text-xs">{isPurchaseMode ? 'مخزن / فرع' : 'اختيار فرع'}</span>
-            </button>
+              {/* Quick Add Product */}
+              <button
+                onClick={() => setShowQuickAddProductModal(true)}
+                className="flex flex-col items-center p-2 text-gray-300 hover:text-white cursor-pointer min-w-[80px] transition-all"
+              >
+                <PlusIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">إضافة</span>
+              </button>
+            </div>
 
-            <button
-              onClick={() => setIsRecordsModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white cursor-pointer whitespace-nowrap bg-[#2B3544] hover:bg-[#434E61] rounded transition-colors"
-            >
-              <DocumentTextIcon className="h-4 w-4" />
-              <span className="text-xs">اختيار سجل</span>
-            </button>
+            {/* Right Side - Mode Buttons */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => {
+                  setIsTransferMode(false)
+                  setIsReturnMode(false)
+                  setShowPurchaseModeConfirm(false)
+                  setTransferFromLocation(null)
+                  setTransferToLocation(null)
+                }}
+                className={`flex flex-col items-center p-2 cursor-pointer min-w-[70px] transition-all rounded ${
+                  !isPurchaseMode && !isTransferMode && !isReturnMode
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-[#4B5563]'
+                }`}
+              >
+                <HomeIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">بيع</span>
+              </button>
 
-            <button
-              onClick={() => setIsHistoryModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white cursor-pointer whitespace-nowrap bg-[#2B3544] hover:bg-[#434E61] rounded transition-colors"
-            >
-              <ClockIcon className="h-4 w-4" />
-              <span className="text-xs">السجل</span>
-            </button>
+              <button
+                onClick={() => setShowPurchaseModeConfirm(true)}
+                className={`flex flex-col items-center p-2 cursor-pointer min-w-[70px] transition-all rounded ${
+                  isPurchaseMode && !isTransferMode && !isReturnMode
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-[#4B5563]'
+                }`}
+              >
+                <BuildingOfficeIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">شراء</span>
+              </button>
 
-            <button
-              onClick={() => setShowQuickAddProductModal(true)}
-              className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white cursor-pointer whitespace-nowrap bg-[#2B3544] hover:bg-[#434E61] rounded transition-colors"
-            >
-              <PlusIcon className="h-4 w-4" />
-              <span className="text-xs">إضافة منتج</span>
-            </button>
+              <button
+                onClick={() => {
+                  setIsTransferMode(true)
+                  setIsReturnMode(false)
+                  setShowPurchaseModeConfirm(false)
+                  setIsTransferLocationModalOpen(true)
+                }}
+                className={`flex flex-col items-center p-2 cursor-pointer min-w-[70px] transition-all rounded ${
+                  isTransferMode && !isReturnMode
+                    ? 'bg-orange-600 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-[#4B5563]'
+                }`}
+              >
+                <ArrowsRightLeftIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">نقل</span>
+              </button>
+
+              <button
+                onClick={() => setIsReturnMode(!isReturnMode)}
+                className={`flex flex-col items-center p-2 cursor-pointer min-w-[70px] transition-all rounded ${
+                  isReturnMode
+                    ? 'bg-red-600 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-[#4B5563]'
+                }`}
+              >
+                <ArrowUturnLeftIcon className="h-5 w-5 mb-1" />
+                <span className="text-sm">مرتجع</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -460,7 +535,7 @@ export default function POSTabletView({
         {/* Main Content Area - Split View */}
         <div className="flex-1 flex overflow-hidden">
           {/* Products Area */}
-          <div className={`${isCartOpen ? 'w-1/2' : 'w-full'} transition-all duration-300 overflow-hidden`}>
+          <div className={`${isCartOpen ? 'w-1/2' : 'w-full'} transition-all duration-300 overflow-hidden flex flex-col`}>
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-white">جاري التحميل...</div>
@@ -470,52 +545,74 @@ export default function POSTabletView({
                 <div className="text-red-400">خطأ: {error}</div>
               </div>
             ) : (
-              <div className="h-full overflow-y-auto scrollbar-hide p-4">
-                <div className={`grid ${gridCols} gap-4`}>
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      onClick={() => handleProductClick(product)}
-                      className={`bg-[#374151] rounded-lg p-3 cursor-pointer transition-all duration-200 border-2 ${
-                        selectedProduct?.id === product.id
-                          ? 'border-blue-500 bg-[#434E61]'
-                          : 'border-transparent hover:border-gray-500 hover:bg-[#434E61]'
-                      }`}
-                    >
-                      {/* Product Image */}
-                      <div className="w-full h-32 bg-[#2B3544] rounded-md mb-3 flex items-center justify-center overflow-hidden">
-                        {product.main_image_url ? (
-                          <img
-                            src={product.main_image_url}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.style.display = 'none'
-                              target.nextElementSibling?.classList.remove('hidden')
-                            }}
-                          />
-                        ) : null}
-                        <div className={`w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center ${product.main_image_url ? 'hidden' : ''}`}>
-                          <span className="text-2xl">📦</span>
+              <>
+                {viewMode === 'table' ? (
+                  /* Table View */
+                  <div className="flex-1 min-h-0">
+                    <ResizableTable
+                      className="h-full w-full"
+                      columns={tableColumns}
+                      data={filteredProducts}
+                      selectedRowId={selectedProduct?.id || null}
+                      onRowClick={(product, index) => {
+                        if (selectedProduct?.id === product.id) {
+                          handleProductClick(null)
+                        } else {
+                          handleProductClick(product)
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  /* Grid View */
+                  <div className="h-full overflow-y-auto scrollbar-hide p-4">
+                    <div className={`grid ${gridCols} gap-4`}>
+                      {filteredProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          onClick={() => handleProductClick(product)}
+                          className={`bg-[#374151] rounded-lg p-3 cursor-pointer transition-all duration-200 border-2 ${
+                            selectedProduct?.id === product.id
+                              ? 'border-blue-500 bg-[#434E61]'
+                              : 'border-transparent hover:border-gray-500 hover:bg-[#434E61]'
+                          }`}
+                        >
+                          {/* Product Image */}
+                          <div className="w-full h-32 bg-[#2B3544] rounded-md mb-3 flex items-center justify-center overflow-hidden">
+                            {product.main_image_url ? (
+                              <img
+                                src={product.main_image_url}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement
+                                  target.style.display = 'none'
+                                  target.nextElementSibling?.classList.remove('hidden')
+                                }}
+                              />
+                            ) : null}
+                            <div className={`w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center ${product.main_image_url ? 'hidden' : ''}`}>
+                              <span className="text-2xl">📦</span>
+                            </div>
+                          </div>
+
+                          {/* Product Name */}
+                          <h3 className="text-white font-medium text-xs text-center mb-2 line-clamp-2">
+                            {product.name}
+                          </h3>
+
+                          {/* Product Price */}
+                          <div className="text-center">
+                            <span className="text-blue-400 font-medium text-sm">
+                              {formatPrice(product.price || 0, 'system')}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Product Name */}
-                      <h3 className="text-white font-medium text-xs text-center mb-2 line-clamp-2">
-                        {product.name}
-                      </h3>
-
-                      {/* Product Price */}
-                      <div className="text-center">
-                        <span className="text-blue-400 font-medium text-sm">
-                          {formatPrice(product.price || 0, 'system')}
-                        </span>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
